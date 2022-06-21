@@ -1,23 +1,41 @@
-import logo from './logo.svg';
+import { useState, useEffect } from 'react';
 import './App.css';
+import InputField from './components/InputField';
+import TodoList from './components/TodoList';
+import { useDispatch, useSelector } from 'react-redux';
+import { addNewTodo, fetchTodos } from '../src/store/todoSlice';
 
 function App() {
+  const [title, setTitle] = useState('');
+  const {status, error} = useSelector(state => state.todos);
+  const dispatch = useDispatch();
+
+  const addTask = () => {
+    if (title.trim().length !== 0) {
+      dispatch(addNewTodo(title));
+      setTitle('');
+    }
+  };
+
+  const handleInput = (value) => {
+    setTitle(value);
+    console.log(title, value);
+  }
+
+  useEffect(()=>{
+    dispatch(fetchTodos());
+  }, [dispatch])
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <InputField
+        title={title}
+        handleSubmit={addTask}
+        handleInput={handleInput}
+      />
+      {status === 'loading' && <h1>Loading...</h1>}
+      {error && <h2>An error occured: {error}</h2>}
+      <TodoList />
     </div>
   );
 }
